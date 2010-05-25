@@ -2,7 +2,8 @@ require 'singleton'
 
 class Breadcrumb
   include Singleton
-  Trail = Struct.new(:controller, :action, :trail, :options, :line) do
+
+  module ConditionChecker
     def condition_met?(obj)
       if options[:if]
         evaluate(obj, options[:if])
@@ -12,7 +13,7 @@ class Breadcrumb
         true
       end
     end
-    
+
     def evaluate(obj, condition)
       if condition.respond_to?(:call)
         condition.call(obj.controller)
@@ -21,8 +22,14 @@ class Breadcrumb
       end
     end
   end
+
+  Trail = Struct.new(:controller, :action, :trail, :options, :line) do
+    include ConditionChecker
+  end
   
-  Crumb = Struct.new(:name, :title, :url, :params)
+  Crumb = Struct.new(:name, :title, :url, :params, :options) do
+    include ConditionChecker
+  end
   
   attr_accessor :trails, :crumbs, :delimiter
   
@@ -46,9 +53,16 @@ class Breadcrumb
   end
   
   def crumb(name, title, url, *params)
-    params = params.first if params.any? && params.first.is_a?(Hash)
+    options = {}
+    if params.any? && params.first.is_a?(Hash)
+      params = params.first
+      options[:if] = params.delete(:if) if params.include?(:if)
+      options[:unless] = params.delete(:unless) if params.include?(:unless)
+    elsif params.any? && params.last.is_a?(Hash)
+      options = params.pop
+    end
     @crumbs ||= {}
-    @crumbs[name] = Crumb.new(name, title, url, params)
+    @crumbs[name] = Crumb.new(name, title, url, params, options)
   end
   
   def context(name)

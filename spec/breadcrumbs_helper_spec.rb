@@ -122,6 +122,18 @@ describe BreadcrumbsHelper do
       crumbs.should == %Q{<a href="http://test.host/f/jonathan">Public Profile</a> / <a href="http://test.host/account/edit">Your Account</a>}
     end
     
+    it "should exclude crumbs with unmet condition" do
+      Breadcrumb.configure do
+        trail :accounts, :show, [:profile, :your_account]
+        crumb :profile, "Public Profile", :user_url, :user, :if => lambda {false}
+        crumb :your_account, "Your Account", :edit_account_url
+      end
+
+      params[:controller] = 'accounts'
+      params[:action] = 'show'
+      crumbs.should == %Q{<a href="http://test.host/account/edit">Your Account</a>}
+    end
+
     it "should return an empty string for no matches" do
       Breadcrumb.configure do
       end

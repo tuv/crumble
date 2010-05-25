@@ -26,6 +26,36 @@ describe Breadcrumb do
       profile.url.should == :user_url
       profile.params.should == [:user]
     end
+
+    it "should add crumbs without options" do
+      Breadcrumb.configure do
+        crumb :profile, "Public Profile", :user_url, :user
+      end
+
+      profile = Breadcrumb.instance.crumbs[:profile]
+      profile.params.should == [:user]
+      profile.options.should be_empty
+    end
+
+    it "should add crumbs without params but with options" do
+      Breadcrumb.configure do
+        crumb :profile, "Public Profile", :user_url, :if => 'true'
+      end
+
+      profile = Breadcrumb.instance.crumbs[:profile]
+      profile.params.should == {}
+      profile.options.should == {:if => 'true'}
+    end
+
+    it "should add crumbs with params and options" do
+      Breadcrumb.configure do
+        crumb :profile, "Public Profile", :user_url, :user, :if => 'true'
+      end
+
+      profile = Breadcrumb.instance.crumbs[:profile]
+      profile.params.should == [:user]
+      profile.options.should == {:if => 'true'}
+    end
     
     it "should store the delimiter" do
       Breadcrumb.configure do
@@ -69,7 +99,7 @@ describe Breadcrumb do
         Breadcrumb.configure do
           trail :accounts, :edit, [:profile]
         end
-      }.should raise_error(RuntimeError, "Trail for accounts/edit references non-existing crumb 'profile' (configuration file line: 70)")
+      }.should raise_error(RuntimeError, "Trail for accounts/edit references non-existing crumb 'profile' (configuration file line: 100)")
     end
     
     it "should include errors for multiple missing crumb definitions" do
@@ -78,7 +108,7 @@ describe Breadcrumb do
           trail :accounts, :edit, [:profile]
           trail :accounts, :show, [:profile]
         end
-      }.should raise_error(RuntimeError, "Trail for accounts/edit references non-existing crumb 'profile' (configuration file line: 78)\nTrail for accounts/show references non-existing crumb 'profile' (configuration file line: 79)")
+      }.should raise_error(RuntimeError, "Trail for accounts/edit references non-existing crumb 'profile' (configuration file line: 108)\nTrail for accounts/show references non-existing crumb 'profile' (configuration file line: 109)")
     end
   end
 end

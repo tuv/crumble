@@ -14,6 +14,7 @@ module BreadcrumbsHelper
     breadcrumb_trail = []
     trail.each do |crummy|
       crumb = Breadcrumb.instance.crumbs[crummy]
+      next unless crumb.condition_met?(self)
       if not Breadcrumb.instance.last_crumb_linked? and crummy == trail.last
         breadcrumb_trail << eval(%Q{"#{assemble_crumb_title(crumb)}"})        
       else
