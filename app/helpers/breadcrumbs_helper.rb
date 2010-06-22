@@ -21,7 +21,17 @@ module BreadcrumbsHelper
         breadcrumb_trail << link_to(eval(%Q{"#{assemble_crumb_title(crumb)}"}), fetch_crumb_url(crumb))
       end
     end
-    breadcrumb_trail.join(Breadcrumb.instance.delimiter)
+    
+    last_crumb = breadcrumb_trail[-1]
+    first_crumb = breadcrumb_trail[0..-2].first
+    middle_crumbs = breadcrumb_trail[1..-2]
+
+    html = '<ul id="breadcrumb">'
+    html << '<li class="home first">' << first_crumb << '</li>' if first_crumb
+    middle_crumbs.each {|crumb| html << '<li>' << crumb << '</li>'}
+    html << '<li class="current last">' << last_crumb << '</li>' if last_crumb
+    html << '</ul>'
+    html
   end
   
   def fetch_parameterized_crumb_url(crumb)
