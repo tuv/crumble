@@ -55,6 +55,9 @@ module BreadcrumbsHelper
             instance_eval(name)
           end
         end
+        if crumb.options[:params]
+          prams << fetch_parameters_recursive(crumb.options[:params])
+        end
         send(crumb.url, *prams)
       end
     end
